@@ -1,10 +1,16 @@
 package com.game.controller;
 
+import com.fasterxml.jackson.databind.JsonSerializable;
+import com.fasterxml.jackson.databind.util.JSONPObject;
+import com.fasterxml.jackson.databind.util.JSONWrappedObject;
 import com.game.entity.Player;
 import com.game.exception.InvalidArgumentException;
 import com.game.exception.NotFoundException;
 import com.game.service.PlayerService;
+import jdk.nashorn.internal.ir.debug.JSONWriter;
+import jdk.nashorn.internal.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -18,14 +24,14 @@ public class PlayerController {
         this.playerService = service;
     }
 
-    @GetMapping
+    @GetMapping()
     public String index() {
         return "index";
     }
 
     // TODO как то надо реализовать фильтры, добавить зависмость от pageNumber и pageSize
     @GetMapping(value = "/rest/players")
-    public ResponseEntity getAll() {
+    public ResponseEntity<?> findAll() {
         try {
             return ResponseEntity.ok().body(playerService.findAll());
         } catch (Exception e) {
@@ -34,8 +40,22 @@ public class PlayerController {
         }
     }
 
+    // Готов, тесты прошёл.
+    @GetMapping(value = "/rest/players/{id}")
+    public ResponseEntity<?> findById(@PathVariable(name = "id") Integer id) {
+        try {
+            Player foundedPlayer = playerService.findById(id);
+            return ResponseEntity.ok(foundedPlayer);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Invalid id");
+        }
+    }
+
+    // Готов, тесты прошёл.
     @GetMapping(value = "/rest/players/count")
-    public ResponseEntity getCount() {
+    public ResponseEntity<?> getCount() {
         try {
             return ResponseEntity.ok().body(playerService.findAll().size());
         } catch (Exception e) {
@@ -44,42 +64,36 @@ public class PlayerController {
         }
     }
 
+    // Готов, тесты прошёл.
     @DeleteMapping(value = "/rest/players/{id}")
-    public ResponseEntity deletePlayerById (@PathVariable(value = "id") Integer id) {
+    public ResponseEntity<?> deletePlayer(@PathVariable(value = "id") Integer id) {
         try {
             playerService.deletePlayer(id);
             return ResponseEntity.ok().body("Player successfully deleted.");
         } catch (NotFoundException e) {
             return ResponseEntity.status(404).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(400).body("Invalid id");
+            return ResponseEntity.badRequest().body("Invalid id");
         }
     }
 
-
-    // TODO в ответ надо отослать экземпляр созданного игрока
+    // Готов, тесты прошёл.
     @PostMapping(value = "/rest/players")
-    public ResponseEntity createPlayer(@RequestBody Player player) {
+    public ResponseEntity<?> createPlayer(@RequestBody Player player) {
         try {
-            playerService.createPlayer(player);
-            return ResponseEntity.ok().body("Player saved");
+            Player createdPlayer = playerService.createPlayer(player);
+            return ResponseEntity.ok().body(createdPlayer);
         } catch (InvalidArgumentException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.badRequest().body("Something is wrong.");
+            return ResponseEntity.badRequest().body(HttpStatus.BAD_REQUEST);
         }
-    }
-
-    // TODO реализовать метод гет на одного игрока, с возвращением плаера и исключениями
-    @GetMapping (value = "/rest/players/{id}")
-    public ResponseEntity getPlayerById (@PathVariable(name = "id") Integer id) {
-        return null;
     }
 
     // TODO реализовать метод апдейт со всеми вытекающими
-    @PostMapping (value = "/rest/players/{id}")
-    public ResponseEntity updatePlayer(@PathVariable(name = "id") Integer id) {
+    @PostMapping(value = "/rest/players/{id}")
+    public ResponseEntity<?> updatePlayer(@PathVariable(name = "id") Integer id) {
         return null;
     }
 }

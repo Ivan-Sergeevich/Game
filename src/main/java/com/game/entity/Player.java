@@ -1,16 +1,15 @@
 package com.game.entity;
 
-import com.sun.tracing.dtrace.Attributes;
-
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 
 @Entity
-@Table (name = "player")
-public class Player {
+@Table(name = "player")
+public class Player implements Serializable {
 
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
     public Integer getId() {
@@ -39,7 +38,7 @@ public class Player {
     }
 
     @Column(columnDefinition = "Race")
-    @Enumerated (EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     private Race race;
     public Race getRace() {
         return race;
@@ -49,7 +48,7 @@ public class Player {
     }
 
     @Column(name = "profession")
-    @Enumerated (EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     private Profession profession;
     public Profession getProfession() {
         return profession;
@@ -69,12 +68,12 @@ public class Player {
     }
 
     @Column(name = "banned")
-    private boolean isBanned;
+    private boolean banned = false;
     public boolean isBanned() {
-        return isBanned;
+        return banned;
     }
     public void setBanned(boolean banned) {
-        isBanned = banned;
+        this.banned = banned;
     }
 
     @Column(name = "experience")
@@ -94,6 +93,9 @@ public class Player {
     public void setLevel(Integer level) {
         this.level = level;
     }
+    public Integer calculateLevel() {
+        return (int) (((Math.sqrt(2500 + 200 * this.experience)) - 50) / 100);
+    }
 
     @Column(name = "untilNextLevel")
     private Long untilNextLevel;
@@ -103,8 +105,33 @@ public class Player {
     public void setUntilNextLevel(Long untilNextLevel) {
         this.untilNextLevel = untilNextLevel;
     }
-
+    public Long calculateNextLevelExp() {
+        return (50 * (long) (this.level + 1) * (this.level + 2)) - this.experience;
+    }
 
     public Player() {
+    }
+
+    public Player(String name, String title,
+                  Race race, Profession profession,
+                  Date birthday, boolean banned,
+                  Long experience, Integer level,
+                  Long untilNextLevel) {
+
+        this.name = name;
+        this.title = title;
+        this.race = race;
+        this.profession = profession;
+        this.birthday = birthday;
+        this.banned = banned;
+        this.experience = experience;
+
+        if (level == null)
+            this.level = calculateLevel();
+        else this.level = level;
+
+        if (untilNextLevel == null)
+            this.untilNextLevel = calculateNextLevelExp();
+        else this.untilNextLevel = untilNextLevel;
     }
 }
