@@ -23,6 +23,7 @@ public class PlayerController {
         return "index";
     }
 
+    // TODO как то надо реализовать фильтры, добавить зависмость от pageNumber и pageSize
     @GetMapping(value = "/rest/players")
     public ResponseEntity getAll() {
         try {
@@ -55,6 +56,8 @@ public class PlayerController {
         }
     }
 
+
+    // TODO в ответ надо отослать экземпляр созданного игрока
     @PostMapping(value = "/rest/players")
     public ResponseEntity createPlayer(@RequestBody Player player) {
         try {
@@ -66,5 +69,17 @@ public class PlayerController {
             e.printStackTrace();
             return ResponseEntity.badRequest().body("Something is wrong.");
         }
+    }
+
+    // TODO реализовать метод гет на одного игрока, с возвращением плаера и исключениями
+    @GetMapping (value = "/rest/players/{id}")
+    public ResponseEntity getPlayerById (@PathVariable(name = "id") Integer id) {
+        return null;
+    }
+
+    // TODO реализовать метод апдейт со всеми вытекающими
+    @PostMapping (value = "/rest/players/{id}")
+    public ResponseEntity updatePlayer(@PathVariable(name = "id") Integer id) {
+        return null;
     }
 }

@@ -28,6 +28,7 @@ public class PlayerServiceImpl implements PlayerService {
         return repository.findById(id).get();
     }
 
+    // TODO добавить бизнес логику на вычисление уровня и опыта до след уровня
     @Override
     public void createPlayer(Player player) throws InvalidArgumentException {
         if (player.getName() == null ||
