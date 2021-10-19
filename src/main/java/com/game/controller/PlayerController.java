@@ -1,19 +1,21 @@
 package com.game.controller;
 
-import com.fasterxml.jackson.databind.JsonSerializable;
-import com.fasterxml.jackson.databind.util.JSONPObject;
-import com.fasterxml.jackson.databind.util.JSONWrappedObject;
 import com.game.entity.Player;
 import com.game.exception.InvalidArgumentException;
 import com.game.exception.NotFoundException;
 import com.game.service.PlayerService;
-import jdk.nashorn.internal.ir.debug.JSONWriter;
-import jdk.nashorn.internal.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Locale;
 
 @Controller
 public class PlayerController {
@@ -24,16 +26,21 @@ public class PlayerController {
         this.playerService = service;
     }
 
-    @GetMapping()
+    @GetMapping("/")
     public String index() {
         return "index";
     }
 
-    // TODO как то надо реализовать фильтры, добавить зависмость от pageNumber и pageSize
-    @GetMapping(value = "/rest/players")
-    public ResponseEntity<?> findAll() {
+    // TODO как то надо реализовать фильтры
+    @GetMapping("/rest/players")
+    public ResponseEntity<?> findAll(@RequestParam (value = "order", required = false, defaultValue = "id") String order,
+                                     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
+                                     @RequestParam(value = "pageSize", required = false, defaultValue = "3") String pageSize) {
         try {
-            return ResponseEntity.ok().body(playerService.findAll());
+            Page<Player> page = playerService.
+                    findAll(PageRequest.of(Integer.parseInt(pageNumber), Integer.parseInt(pageSize),
+                            Sort.by(order.toLowerCase(Locale.ROOT))));
+            return ResponseEntity.ok().body(page.getContent());
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().body("Something is wrong.");
@@ -41,7 +48,7 @@ public class PlayerController {
     }
 
     // Готов, тесты прошёл.
-    @GetMapping(value = "/rest/players/{id}")
+    @GetMapping(value = "(/rest/players/{id}")
     public ResponseEntity<?> findById(@PathVariable(name = "id") Integer id) {
         try {
             Player foundedPlayer = playerService.findById(id);
@@ -78,7 +85,7 @@ public class PlayerController {
     }
 
     // Готов, тесты прошёл.
-    @PostMapping(value = "/rest/players")
+    @PostMapping("/rest/players")
     public ResponseEntity<?> createPlayer(@RequestBody Player player) {
         try {
             Player createdPlayer = playerService.createPlayer(player);

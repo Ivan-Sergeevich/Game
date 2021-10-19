@@ -1,17 +1,18 @@
 package com.game.service;
 
+import com.game.controller.PlayerOrder;
 import com.game.entity.Player;
 import com.game.exception.InvalidArgumentException;
 import com.game.exception.NotFoundException;
 import com.game.repository.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
@@ -74,6 +75,11 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public List<Player> findAll() {
         return repository.findAll();
+    }
+
+    @Override
+    public Page<Player> findAll(Pageable var1) {
+        return repository.findAll(var1);
     }
 
     private void checkId(Integer id) throws NotFoundException, InvalidArgumentException {
